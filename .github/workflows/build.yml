@@ -92,21 +92,13 @@ jobs:
       shell: bash
       run: |
         cd build && ninja
-if [[ "${{ runner.os }}" == "Windows" ]] ; then
-    - uses: actions/upload-artifact@v3
-      with:
-        name: aseprite
-        path: |
-          ./bin/data
-          ./bin/aseprite.exe
-else
+
     - uses: actions/upload-artifact@v3
       with:
         name: aseprite
         path: |
           ./bin/data
           ./bin/aseprite
-if
 
     - name: Running C++ Tests
       shell: bash
