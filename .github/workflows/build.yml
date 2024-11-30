@@ -10,6 +10,7 @@ jobs:
         build_type: [RelWithDebInfo, Debug]
         ui: [gui, cli]
         scripting: [lua, noscripts]
+        arch: [arm64, x86_64]  # 添加架构选项
         exclude:
           - build_type: Debug
             ui: gui
@@ -38,8 +39,12 @@ jobs:
           wget https://github.com/aseprite/skia/releases/download/m102-861e4743af/Skia-Windows-Release-x64.zip
           unzip Skia-Windows-Release-x64.zip -d skia
         elif [[ "${{ runner.os }}" == "macOS" ]] ; then
-          wget https://github.com/aseprite/skia/releases/download/m102-861e4743af/Skia-macOS-Release-arm64.zip
-          unzip Skia-macOS-Release-arm64.zip -d skia
+          if [[ "${{ matrix.arch }}" == "arm64" ]]; then
+            wget https://github.com/aseprite/skia/releases/download/m102-861e4743af/Skia-macOS-Release-arm64.zip
+          else
+            wget https://github.com/aseprite/skia/releases/download/m102-861e4743af/Skia-macOS-Release-x86_64.zip  # 添加 x86_64 下载链接
+          fi
+          unzip Skia-macOS-Release-${{ matrix.arch }}.zip -d skia
         else
           wget https://github.com/aseprite/skia/releases/download/m102-861e4743af/Skia-Linux-Release-x64-libstdc++.zip
           unzip Skia-Linux-Release-x64-libstdc++.zip -d skia
@@ -48,7 +53,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1
       if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
       with:
-        key: ${{ matrix.os }}-${{ matrix.ui }}-${{ matrix.scripting }}-${{ matrix.build_type }}
+        key: ${{ matrix.os }}-${{ matrix.ui }}-${{ matrix.scripting }}-${{ matrix.build_type }}-${{ matrix.arch }}  # 添加架构到缓存键
     - uses: aseprite/get-ninja@main
     - uses: ilammy/msvc-dev-cmd@v1
       if: runner.os == 'Windows'
@@ -74,7 +79,7 @@ jobs:
         fi
 
         if [[ "${{ runner.os }}" == "macOS" ]] ; then
-          export skia_arch=arm64
+          export skia_arch=${{ matrix.arch }}  # 使用矩阵中的架构
         else
           export skia_arch=x64
         fi
@@ -104,5 +109,3 @@ jobs:
         path: |
           build/bin/data
           build/bin/aseprite
-
-
