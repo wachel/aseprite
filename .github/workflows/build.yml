@@ -42,7 +42,7 @@ jobs:
           if [[ "${{ matrix.arch }}" == "arm64" ]]; then
             wget https://github.com/aseprite/skia/releases/download/m102-861e4743af/Skia-macOS-Release-arm64.zip
           else
-            wget https://github.com/aseprite/skia/releases/download/m102-861e4743af/Skia-macOS-Release-x86_64.zip  # 添加 x86_64 下载链接
+            wget https://github.com/aseprite/skia/releases/download/m102-861e4743af/Skia-macOS-Release-x64.zip  # 添加 x64 下载链接
           fi
           unzip Skia-macOS-Release-${{ matrix.arch }}.zip -d skia
         else
