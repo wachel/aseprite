@@ -6,11 +6,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest]
         build_type: [RelWithDebInfo, Debug]
         ui: [gui, cli]
         scripting: [lua, noscripts]
-        arch: [x64]  # 仅包含 x64 架构
+        arch: [x64]  # 只包含x64架构
         exclude:
           - build_type: Debug
             ui: gui
@@ -50,7 +49,7 @@ jobs:
           export enable_scripting=off
         fi
 
-        export skia_arch=x64
+        export skia_arch=x64  # 使用x64架构
 
         cmake -S . -B build -G Ninja \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
