@@ -6,7 +6,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        build_type: [RelWithDebInfo, Debug]
+        build_type: [RelWithDebInfo]
         ui: [gui, cli]
         scripting: [lua, noscripts]
         arch: [x64]  # 只包含x64架构
