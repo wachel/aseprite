@@ -10,7 +10,7 @@ jobs:
         build_type: [RelWithDebInfo, Debug]
         ui: [gui, cli]
         scripting: [lua, noscripts]
-        arch: [arm64, x86_64]  # 添加架构选项
+        arch: [arm64, x64]  # 添加架构选项
         exclude:
           - build_type: Debug
             ui: gui
