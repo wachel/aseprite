@@ -1,0 +1,79 @@
+name: build
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest]
+        build_type: [RelWithDebInfo, Debug]
+        ui: [gui, cli]
+        scripting: [lua, noscripts]
+        arch: [x64]  # 仅包含 x64 架构
+        exclude:
+          - build_type: Debug
+            ui: gui
+          - build_type: RelWithDebInfo
+            ui: cli
+          - build_type: RelWithDebInfo
+            scripting: noscripts
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+    - name: Install Skia
+      if: ${{ matrix.ui == 'gui' }}
+      shell: bash
+      run: |
+        wget https://github.com/aseprite/skia/releases/download/m102-861e4743af/Skia-macOS-Release-x64.zip
+        unzip Skia-macOS-Release-x64.zip -d skia
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: ${{ matrix.os }}-${{ matrix.ui }}-${{ matrix.scripting }}-${{ matrix.build_type }}-${{ matrix.arch }}  # 添加架构到缓存键
+    - uses: aseprite/get-ninja@main
+    - name: Generating Makefiles
+      shell: bash
+      run: |
+        export enable_ccache=on
+
+        if [[ "${{ matrix.ui }}" == "gui" ]] ; then
+          export laf_backend=skia
+        else
+          export laf_backend=none
+        fi
+
+        if [[ "${{ matrix.scripting }}" == "lua" ]] ; then
+          export enable_scripting=on
+        else
+          export enable_scripting=off
+        fi
+
+        export skia_arch=x64
+
+        cmake -S . -B build -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 \
+          -DENABLE_TESTS=ON \
+          -DENABLE_SCRIPTING=$enable_scripting \
+          -DENABLE_CCACHE=$enable_ccache \
+          -DLAF_BACKEND=$laf_backend \
+          -DSKIA_DIR=skia \
+          -DSKIA_LIBRARY_DIR=skia/out/Release-$skia_arch
+    - name: Compiling
+      shell: bash
+      run: |
+        cd build && ninja
+
+    - name: List build directory
+      shell: bash
+      run: |
+        ls -R build
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: aseprite
+        path: |
+          build/bin/data
+          build/bin/aseprite
