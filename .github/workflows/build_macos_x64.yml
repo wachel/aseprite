@@ -76,3 +76,4 @@ jobs:
         path: |
           build/bin/data
           build/bin/aseprite
+ 
